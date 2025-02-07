@@ -1,25 +1,29 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import FetchImages from './API/UnsplashAPI';
-import SearchBar from './SearchBar/SearchBar';
-import ImageGallery from './ImageGallery/ImageGallery';
-import LoadMoreBtn from './LoadMoreBtn/LoadMoreBtn';
-import customToast from './ErrorMessages/Toast/ToastMessage';
-import Loader from './Loader/Loader';
-import ErrorMessage from './ErrorMessages/API/ErrorMessage';
+
+import SearchBar from '../SearchBar/SearchBar';
+import ImageGallery from '../ImageGallery/ImageGallery';
+import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn';
+import customToast from '../ErrorMessages/Toast/ToastMessage';
+import ErrorMessage from '../ErrorMessages/API/ErrorMessage';
+import ImageModal from '../ImageModal/ImageModal';
+import Loader from '../Loader/Loader';
+
+import FetchImages from '../API/UnsplashAPI';
+import { Image } from './App.types';
+
 import s from './App.module.css';
-import ImageModal from './ImageModal/ImageModal';
 
 const App = () => {
-  const [query, setQuery] = useState('');
-  const [images, setImages] = useState([]);
-  const [page, setPage] = useState(1);
-  const [isShowButton, setIsShowButton] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const galleryRef = useRef(null);
+  const [query, setQuery] = useState<string>('');
+  const [images, setImages] = useState<Image[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [isShowButton, setIsShowButton] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const galleryRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (!query) return;
@@ -31,7 +35,7 @@ const App = () => {
 
         if (res.results.length === 0) {
           setIsShowButton(false);
-          customToast('warn', 'Sorry, there are no images matching your search');
+          customToast({ type: 'warn', message: 'Sorry, there are no images matching your search' });
           setIsLoading(false);
           return;
         }
@@ -48,14 +52,14 @@ const App = () => {
     renderGallery();
   }, [query, page]);
 
-  const getInputValue = newQuery => {
+  const getInputValue = (newQuery: string) => {
     if (newQuery === query) return;
     setQuery(newQuery);
     setImages([]);
     setPage(1);
   };
 
-  const handleImageClick = image => {
+  const handleImageClick = (image: Image) => {
     setSelectedImage(image);
     setIsModalOpen(true);
   };
@@ -67,7 +71,7 @@ const App = () => {
 
   useLayoutEffect(() => {
     if (galleryRef.current && images.length > 0) {
-      const { height: cardHeight } = galleryRef.current.firstElementChild.getBoundingClientRect();
+      const { height: cardHeight } = galleryRef.current.firstElementChild!.getBoundingClientRect();
 
       window.scrollBy({
         top: cardHeight * 1,
@@ -78,8 +82,9 @@ const App = () => {
 
   return (
     <>
-      <SearchBar onSubmit={getInputValue} />
+      {isLoading && <Loader />}
       <Toaster />
+      <SearchBar onSubmit={getInputValue} />
       <div className={s.container}>
         {error ? (
           <ErrorMessage message={error} />
@@ -89,7 +94,6 @@ const App = () => {
           )
         )}
       </div>
-      {isLoading && <Loader />}
       {isShowButton && <LoadMoreBtn onClick={() => setPage(page => page + 1)} />}
       <ImageModal isOpen={isModalOpen} onClose={closeModal} image={selectedImage} />
     </>

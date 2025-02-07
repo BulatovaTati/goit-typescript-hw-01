@@ -1,17 +1,20 @@
-import PropTypes from 'prop-types';
+import { FormEvent, useState } from 'react';
 import { FcSearch } from 'react-icons/fc';
-import { useState } from 'react';
 import customToast from '../ErrorMessages/Toast/ToastMessage';
 import s from './SearchBar.module.css';
 
-const SearchBar = ({ onSubmit }) => {
-  const [query, setQuery] = useState('');
+interface SearchBarProps {
+  onSubmit: (query: string) => void;
+}
 
-  const handleSubmit = e => {
+const SearchBar = ({ onSubmit }: SearchBarProps) => {
+  const [query, setQuery] = useState<string>('');
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (query.trim() === '') {
-      customToast('warn', 'Oops... Enter something');
+      customToast({ type: 'warn', message: 'Oops... Enter something' });
       return;
     }
 
@@ -36,10 +39,6 @@ const SearchBar = ({ onSubmit }) => {
       </form>
     </header>
   );
-};
-
-SearchBar.propTypes = {
-  onSubmit: PropTypes.func,
 };
 
 export default SearchBar;

@@ -1,11 +1,17 @@
 import axios from 'axios';
+import { Image } from '../App/App.types';
 const API_KEY = 'gcevo00lZKvSMKLnZZJPKYS5xNbpbsP_4i6E-BVlG58';
 const BASE_URL = 'https://api.unsplash.com/search/photos';
 
-const FetchImages = async (query, page = 1) => {
-  const response = await axios(BASE_URL, {
+interface UnsplashResponse {
+  results: Image[];
+  total: number;
+}
+
+const FetchImages = async (query: string, page: number = 1): Promise<UnsplashResponse> => {
+  const { data } = await axios<UnsplashResponse>(BASE_URL, {
     params: {
-      query: query,
+      query,
       page,
       per_page: 12,
       orientation: 'portrait',
@@ -15,7 +21,7 @@ const FetchImages = async (query, page = 1) => {
     },
   });
 
-  return response.data;
+  return data;
 };
 
 export default FetchImages;
